@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RescueMesh Mission Control — Operator Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside id="appSidebar" class="sidebar"></aside>
+    <div class="main-area">
+      <header id="appTopbar" class="topbar"></header>
+      <main class="page-content">
+        <div class="sim-banner">
+          <div>
+            <strong>DEMONSTRATION MODE:</strong> All readings, agent telemetry, and charts below are <strong>SIMULATED DATA</strong> unless connected to physical hardware.
+          </div>
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            <button id="toggleSimBtn" class="btn btn-sm btn-primary" type="button">Pause Live Updates</button>
+            <button id="resetDemoBtn" class="btn btn-sm" type="button">Reset Demo</button>
+          </div>
+        </div>
+
+        <div id="globalHoldBanner" class="hold-banner">
+          <div>
+            <strong>MISSION STATE: HOLD — COMMUNICATION UNAVAILABLE</strong>
+            <div class="text-sm">All communication routes are currently unavailable. Telemetry is buffered locally (<span data-buffer-count>0</span> packets).</div>
+          </div>
+          <a href="network.html" class="btn btn-sm btn-success">Open Mesh Recovery</a>
+        </div>
+
+        <!-- Summary KPI Cards -->
+        <section class="grid grid-6 mb-3" id="summaryCards">
+          <div class="kpi-card">
+            <span class="kpi-label">Active Agents</span>
+            <span class="kpi-value" id="kpiActiveAgents">5 / 5</span>
+            <span class="kpi-sub">Simulated fleet</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Network Status</span>
+            <span class="kpi-value" id="kpiNetworkStatus" style="font-size:1.15rem;">CONNECTED</span>
+            <span class="kpi-sub">Mesh telemetry</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Rover Battery</span>
+            <span class="kpi-value" id="kpiRoverBattery">84%</span>
+            <span class="kpi-sub">Ground Unit (sim)</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Drone Battery</span>
+            <span class="kpi-value" id="kpiDroneBattery">78%</span>
+            <span class="kpi-sub">Aerial Unit (sim)</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Active Mission</span>
+            <span class="kpi-value" id="kpiMissionCode" style="font-size:1.15rem;">RM-SIM-001</span>
+            <span class="kpi-sub" id="kpiMissionStatus">ACTIVE</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Alerts</span>
+            <span class="kpi-value" id="kpiAlertsCount">0</span>
+            <span class="kpi-sub">Warnings &amp; holds</span>
+          </div>
+        </section>
+
+        <!-- Panels 1, 2, 3: Rover, Drone, Relay Node Status -->
+        <section class="grid grid-3 mb-3">
+          <div class="card" id="panelRoverStatus">
+            <div class="card-header">
+              <span class="card-title">1. Rover Status</span>
+              <span class="badge badge-online" id="dashRoverBadge">ONLINE</span>
+            </div>
+            <div class="text-sm" id="dashRoverBody"></div>
+          </div>
+          <div class="card" id="panelDroneStatus">
+            <div class="card-header">
+              <span class="card-title">2. Drone Status</span>
+              <span class="badge badge-online" id="dashDroneBadge">ONLINE</span>
+            </div>
+            <div class="text-sm" id="dashDroneBody"></div>
+          </div>
+          <div class="card" id="panelRelayStatus">
+            <div class="card-header">
+              <span class="card-title">3. Relay Node Status</span>
+              <span class="badge badge-info">2 NODES</span>
+            </div>
+            <div class="text-sm" id="dashRelayBody"></div>
+          </div>
+        </section>
+
+        <!-- Panels 4 & 5: Network Health + Environmental Sensor Snapshot -->
+        <section class="grid grid-2 mb-3">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">4. Communication Network Health</span>
+              <a href="network.html" class="btn btn-sm">Manage Mesh</a>
+            </div>
+            <div id="dashNetworkBody" class="text-sm"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">5. Environmental Sensor Readings</span>
+              <span class="badge badge-sim">Simulated Data</span>
+            </div>
+            <div id="dashSensorsGrid" class="grid grid-3"></div>
+            <p class="text-xs text-muted mt-2">
+              Note: Simulated readings only. Thresholds are not calibrated from certified hardware specs and do not certify mine safety.
+            </p>
+          </div>
+        </section>
+
+        <!-- Panels 7 & 8: Battery Monitoring Chart & Mission Progress Chart -->
+        <section class="grid grid-2 mb-3">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">7. Battery Monitoring (Simulated)</span>
+              <span class="badge badge-sim">Live Demo Chart</span>
+            </div>
+            <div style="height:240px; position:relative;">
+              <canvas id="batteryChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">8. Mission Progress (Simulated)</span>
+              <span class="badge badge-sim">Sector-B Survey</span>
+            </div>
+            <div style="height:240px; position:relative;">
+              <canvas id="progressChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Panel 6: Recent Mission Events -->
+        <section class="card">
+          <div class="card-header">
+            <span class="card-title">6. Recent Mission Events</span>
+            <a href="reports.html" class="btn btn-sm">Full Mission Logs</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Agent</th>
+                  <th>Event</th>
+                  <th>Comm</th>
+                  <th>Mission</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody id="dashEventsTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

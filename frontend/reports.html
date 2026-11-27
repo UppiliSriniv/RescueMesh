@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mission Reports &amp; Logs — RescueMesh</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside id="appSidebar" class="sidebar"></aside>
+    <div class="main-area">
+      <header id="appTopbar" class="topbar"></header>
+      <main class="page-content">
+        <div class="sim-banner">
+          <div>
+            <strong>DEMONSTRATION METRICS:</strong> Summary benchmark charts and mission logs reflect simulated demonstration events and must not be presented as field-validated experimental results.
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button id="exportCsvBtn" class="btn btn-sm btn-primary" type="button">Export CSV</button>
+            <button id="generateReportBtn" class="btn btn-sm btn-blue" type="button">Generate Report</button>
+          </div>
+        </div>
+
+        <div id="globalHoldBanner" class="hold-banner">
+          <div>
+            <strong>MISSION STATE: HOLD</strong>
+            <div class="text-sm">Local event logging remains active during communication outage (<span data-buffer-count>0</span> pkts buffered).</div>
+          </div>
+          <a href="network.html" class="btn btn-sm btn-success">Mesh Recovery</a>
+        </div>
+
+        <!-- Summary Charts (Demo Only) -->
+        <section class="grid grid-3 mb-3">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title text-sm">Recovery &amp; Availability (Demo Only)</span>
+              <span class="badge badge-sim">Sim Benchmark</span>
+            </div>
+            <div style="height:210px; position:relative;"><canvas id="repAvailabilityChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title text-sm">Packet Delivery Ratio (Demo Only)</span>
+              <span class="badge badge-sim">Sim Benchmark</span>
+            </div>
+            <div style="height:210px; position:relative;"><canvas id="repPdrChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title text-sm">Battery &amp; Progress (Demo Only)</span>
+              <span class="badge badge-sim">Sim Benchmark</span>
+            </div>
+            <div style="height:210px; position:relative;"><canvas id="repBatteryChart"></canvas></div>
+          </div>
+        </section>
+
+        <!-- Filters & Mission Logs Table -->
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title">Mission Event History &amp; Logs</h2>
+            <div style="display:flex; gap:0.55rem; flex-wrap:wrap;">
+              <input id="logSearchInput" class="input" type="text" placeholder="Search agent, event, description..." />
+              <select id="logAgentFilter" class="select">
+                <option value="ALL">All Agents</option>
+                <option value="Ground Rover R1">Ground Rover R1</option>
+                <option value="Aerial Drone D1">Aerial Drone D1</option>
+                <option value="Relay Node 1">Relay Node 1</option>
+                <option value="Relay Node 2">Relay Node 2</option>
+                <option value="Mesh Network">Mesh Network</option>
+                <option value="Rescue Station">Rescue Station</option>
+              </select>
+              <select id="logStatusFilter" class="select">
+                <option value="ALL">All Statuses</option>
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="HOLD">HOLD</option>
+                <option value="CONNECTED">CONNECTED</option>
+                <option value="DISCONNECTED">DISCONNECTED</option>
+              </select>
+              <input id="logDateFilter" class="input" type="date" />
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mission ID</th>
+                  <th>Date &amp; Time</th>
+                  <th>Agent Involved</th>
+                  <th>Event Type</th>
+                  <th>Comm Status</th>
+                  <th>Mission Status</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div id="reportModal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="card-header">
+        <h3>RescueMesh Simulated Mission Report</h3>
+        <button id="closeReportModal" class="btn btn-sm" type="button">Close</button>
+      </div>
+      <div id="reportModalBody" class="text-sm"></div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>

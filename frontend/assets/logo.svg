@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" fill="none">
+  <defs>
+    <linearGradient id="rmGrad" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="4" width="40" height="40" rx="10" fill="#0f1b30" stroke="url(#rmGrad)" stroke-width="2"/>
+  <path d="M12 31L22 14L32 31L22 25L12 31Z" stroke="#14b8a6" stroke-width="1.8" stroke-linejoin="round"/>
+  <line x1="22" y1="14" x2="22" y2="25" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="2 2"/>
+  <circle cx="22" cy="14" r="3.2" fill="#06b6d4"/>
+  <circle cx="12" cy="31" r="3" fill="#3b82f6"/>
+  <circle cx="32" cy="31" r="3" fill="#10b981"/>
+  <circle cx="22" cy="25" r="2.6" fill="#f59e0b"/>
+  <text x="52" y="29" fill="#e2e8f0" font-family="Inter, Segoe UI, system-ui, sans-serif" font-weight="800" font-size="18" letter-spacing="1.6">RESCUEMESH</text>
+  <text x="53" y="40" fill="#38bdf8" font-family="JetBrains Mono, Consolas, monospace" font-weight="600" font-size="8.5" letter-spacing="1.2">TEAM NEXORA • MULTI-AGENT</text>
+</svg>

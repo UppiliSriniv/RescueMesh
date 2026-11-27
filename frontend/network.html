@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-Healing Mesh &amp; Dynamic Roles — RescueMesh</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside id="appSidebar" class="sidebar"></aside>
+    <div class="main-area">
+      <header id="appTopbar" class="topbar"></header>
+      <main class="page-content">
+        <div class="sim-banner">
+          <div>
+            <strong>SIMULATED MESH TOPOLOGY:</strong> Self-healing recovery is conditional on an available physical alternate path, a suitable replacement agent, and sufficient energy—it is not guaranteed under every failure condition.
+          </div>
+          <span class="badge badge-sim">Interactive Demo</span>
+        </div>
+
+        <div id="globalHoldBanner" class="hold-banner">
+          <div>
+            <strong>COMMUNICATION UNAVAILABLE — LOCAL BUFFERING &amp; SAFE HOLD ACTIVE</strong>
+            <div class="text-sm">All routes failed. Packets buffered locally (<span data-buffer-count>0</span> pkts). Click <strong>Restore Network</strong> to recover and flush telemetry.</div>
+          </div>
+          <button id="bannerRestoreBtn" class="btn btn-sm btn-success" type="button">Restore Network</button>
+        </div>
+
+        <!-- Section D: Interactive Self-Healing Mesh Network -->
+        <section class="card mb-3">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Self-Healing Mesh Network Topology</h2>
+              <p class="text-xs text-muted mt-1">
+                Nodes: Rescue Station, Rover, Drone, Relay Node 1, Relay Node 2 • Separate short telemetry &amp; ACK channel
+              </p>
+            </div>
+            <div style="display:flex; gap:0.55rem; flex-wrap:wrap;">
+              <button id="simLinkFailBtn" class="btn btn-warning btn-sm" type="button">Simulate Link Failure</button>
+              <button id="simCompleteLossBtn" class="btn btn-danger btn-sm" type="button">Simulate Complete Network Loss</button>
+              <button id="restoreNetBtn" class="btn btn-success btn-sm" type="button">Restore Network</button>
+            </div>
+          </div>
+
+          <div class="grid grid-3">
+            <!-- Topology SVG Canvas -->
+            <div style="grid-column: span 2; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.75rem;">
+              <svg id="meshSvg" viewBox="0 0 640 330" width="100%" aria-label="Interactive Self-Healing Mesh Topology">
+                <rect width="640" height="330" rx="8" fill="#070f1e"/>
+                <!-- Links rendered by network.js -->
+                <g id="meshLinksLayer"></g>
+                <!-- Nodes rendered by network.js -->
+                <g id="meshNodesLayer"></g>
+              </svg>
+              <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.6rem; font-size:0.76rem; color:var(--text-secondary);">
+                <span><span style="color:#10b981;">&#9644;&#9644;</span> Active Route</span>
+                <span><span style="color:#06b6d4;">&#9644;&#9644;</span> Self-Healed Alternate Route</span>
+                <span><span style="color:#38bdf8;">- - -</span> Standby Backup Link</span>
+                <span><span style="color:#ef4444;">&#10005;</span> Failed Link</span>
+              </div>
+            </div>
+
+            <!-- Live Network Metrics -->
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+              <div class="kpi-card">
+                <span class="kpi-label">Active Communication Route</span>
+                <span class="fw-700 mono text-sm mt-1" id="netActiveRoute">Rover → Relay Node 1 → Rescue Station</span>
+              </div>
+              <div class="kpi-card">
+                <span class="kpi-label">Packet Delivery Status (Sim)</span>
+                <span class="kpi-value" id="netPdr" style="font-size:1.25rem;">98.4%</span>
+                <span class="kpi-sub" id="netAckInfo">SEQ #1042 • App ACKs Confirmed</span>
+              </div>
+              <div class="kpi-card">
+                <span class="kpi-label">Store-and-Forward Buffer</span>
+                <span class="kpi-value" id="netBufferCount" style="font-size:1.25rem;">0 pkts</span>
+                <span class="kpi-sub" id="netHoldState">Mission State: ACTIVE</span>
+              </div>
+              <div class="card" style="background:var(--bg-secondary); padding:0.85rem;">
+                <div class="text-xs fw-600 text-muted mb-1">FAILOVER STATUS LOG</div>
+                <div id="netStatusMessage" class="text-sm">Normal multi-hop ground relay route active.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Link Table -->
+          <div class="table-wrap mt-2">
+            <table>
+              <thead>
+                <tr>
+                  <th>Link ID</th>
+                  <th>Source</th>
+                  <th>Target</th>
+                  <th>Status</th>
+                  <th>Signal Quality (Sim)</th>
+                  <th>Est. Latency</th>
+                </tr>
+              </thead>
+              <tbody id="meshLinksTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section E: Dynamic Agent Role Assignment -->
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Dynamic Agent Role Assignment</h2>
+              <p class="text-xs text-muted mt-1">
+                Supported Roles: <strong>EXPLORER</strong> • <strong>RELAY</strong> • <strong>SUPPORT</strong> — including low-battery relay handover.
+              </p>
+            </div>
+            <button id="simLowBatHandoverBtn" class="btn btn-primary btn-sm" type="button">Simulate Low-Battery Relay Handover</button>
+          </div>
+
+          <div id="handoverVisual" class="handover-track mb-2" style="display:none;">
+            <div>
+              <div class="text-xs text-muted">OUTGOING RELAY (LOW BATTERY)</div>
+              <strong id="hoFromName" class="mono">Aerial Drone D1</strong>
+            </div>
+            <div class="badge badge-warning">HANDOVER IN PROGRESS &rarr;</div>
+            <div>
+              <div class="text-xs text-muted">CONFIRMED REPLACEMENT</div>
+              <strong id="hoToName" class="mono">Relay Node 2</strong>
+            </div>
+          </div>
+
+          <div class="grid grid-4" id="roleCardsGrid"></div>
+
+          <div class="card mt-2" style="background:var(--bg-secondary);">
+            <div class="card-header" style="margin-bottom:0.65rem;">
+              <span class="text-sm fw-700">Manual Role Reassignment (Simulation)</span>
+            </div>
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+              <select id="roleAgentSelect" class="select">
+                <option value="ROVER-01">Ground Rover R1</option>
+                <option value="DRONE-01">Aerial Drone D1</option>
+                <option value="RELAY-01">Relay Node 1</option>
+                <option value="RELAY-02">Relay Node 2</option>
+              </select>
+              <select id="roleTargetSelect" class="select">
+                <option value="EXPLORER">EXPLORER</option>
+                <option value="RELAY">RELAY</option>
+                <option value="SUPPORT">SUPPORT</option>
+              </select>
+              <button id="assignRoleBtn" class="btn btn-blue btn-sm" type="button">Apply Role Change</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/network.js"></script>
+</body>
+</html>
